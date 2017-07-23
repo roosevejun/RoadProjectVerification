@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">畅通工程项目核查</string>
+    <string name="sys_name">畅通工程线路核查系统</string>
+    <string name="app_support">技术支持:安徽省通途信息技术有限公司</string>
+    <string name="login">登录</string>
+    <string name="et_account_hint">请输入用户名</string>
+    <string name="et_password_hint">请输入密码</string>
+    <string name="loginOut">退出</string>
+</resources>
