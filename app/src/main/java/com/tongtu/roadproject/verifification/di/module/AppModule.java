@@ -7,19 +7,30 @@ import android.content.SharedPreferences;
 import com.tongtu.roadproject.verifification.di.ApplicationContext;
 import com.tongtu.roadproject.verifification.di.DatabaseInfo;
 
+import javax.inject.Singleton;
+
 import dagger.Module;
 import dagger.Provides;
+import rx.subscriptions.CompositeSubscription;
 
 /**
- * Created by janisharali on 25/12/16.
+ * 项目名称：RoadProjectVerification
+ * 模块名称：com.tongtu.roadproject.verifification.di.module
+ * 功能描述：
+ * 创建人:倪少君
+ * 创建时间:2017/7/23
+ * 修改人：
+ * 修改时间:
+ *
+ * @版本：V
  */
 
 @Module
-public class ApplicationModule {
+public class AppModule {
 
     private final Application mApplication;
 
-    public ApplicationModule(Application app) {
+    public AppModule(Application app) {
         mApplication = app;
     }
 
@@ -30,6 +41,7 @@ public class ApplicationModule {
     }
 
     @Provides
+    @Singleton
     Application provideApplication() {
         return mApplication;
     }
@@ -49,5 +61,10 @@ public class ApplicationModule {
     @Provides
     SharedPreferences provideSharedPrefs() {
         return mApplication.getSharedPreferences("roadprojectverification-prefs", Context.MODE_PRIVATE);
+    }
+
+    @Provides
+    CompositeSubscription provideCompositeSubscription() {
+        return new CompositeSubscription();
     }
 }

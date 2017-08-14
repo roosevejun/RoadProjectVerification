@@ -1,5 +1,7 @@
 package com.tongtu.roadproject.verifification.di.component;
 
+import com.tongtu.roadproject.verifification.di.EventBusInfo;
+import com.tongtu.roadproject.verifification.di.PerActivity;
 import com.tongtu.roadproject.verifification.di.module.BusModule;
 
 import javax.inject.Named;

@@ -7,13 +7,13 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
+import com.tongtu.roadproject.verifification.activity.BaseActivity;
 import com.tongtu.roadproject.verifification.activity.LoginActivity;
 import com.tongtu.roadproject.verifification.data.DataManager;
-import com.tongtu.roadproject.verifification.data.model.User;
 import com.tongtu.roadproject.verifification.di.component.ActivityComponent;
-import com.tongtu.roadproject.verifification.di.component.BusComponent;
+import com.tongtu.roadproject.verifification.di.component.ApplicationComponent;
 import com.tongtu.roadproject.verifification.di.component.DaggerActivityComponent;
-import com.tongtu.roadproject.verifification.di.component.DaggerBusComponent;
+import com.tongtu.roadproject.verifification.di.module.ActivityModule;
 import com.tongtu.roadproject.verifification.utils.CircularAnim;
 import com.tongtu.roadproject.verifification.utils.LogUtils;
 
@@ -25,24 +25,24 @@ import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 
 
-public class Appstart extends AppCompatActivity {
+public class Appstart extends BaseActivity {
     @Inject
     DataManager mDataManager;
+    @Inject
+    CompositeSubscription mSubscriptions;
     @BindView(R.id.sys_name)
     TextView sysName;
 
-    private static BusComponent sBusComponent;
+
     private ActivityComponent appStartComponent;
 
-    private CompositeSubscription mSubscriptions;
 
     public ActivityComponent getAppStartComponent() {
         if (appStartComponent == null) {
             appStartComponent = DaggerActivityComponent.builder()
-                    .applicationComponent(DemoApplication.get(this).getComponent())
+                    .applicationComponent(DetectApplication.get(this).component()).activityModule(new ActivityModule(this))
                     .build();
         }
-//        activityComponent.inject(this);
         return appStartComponent;
     }
 
@@ -55,11 +55,14 @@ public class Appstart extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         CircularAnim.init(700, 500, R.color.colorPrimary);
         setContentView(R.layout.activity_appstart);
-        getAppStartComponent().inject(this);
         ButterKnife.bind(this);
-        mSubscriptions = new CompositeSubscription();
-        sBusComponent = DaggerBusComponent.create();
-        Subscription subscription = getBusComponent().getAppExitSubject().subscribe((message) -> {
+    }
+
+    @Override
+    protected void setupComponent(ApplicationComponent applicationComponent) {
+        getAppStartComponent().inject(this);
+
+        Subscription subscription = DetectApplication.getBusComponent().getAppExitSubject().subscribe((message) -> {
             LogUtils.i(message);
             android.os.Process.killProcess(android.os.Process.myPid());
             System.exit(1);
@@ -68,9 +71,6 @@ public class Appstart extends AppCompatActivity {
         getCompositeSubscription().add(subscription);
     }
 
-    public static BusComponent getBusComponent() {
-        return sBusComponent;
-    }
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
@@ -95,20 +95,5 @@ public class Appstart extends AppCompatActivity {
         }
     }
 
-    private void createUser() {
-        try {
-            mDataManager.createUser(new User("Ali", "1367, Gurgaon, Haryana, India"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-    private void getUser() {
-        try {
-            User user = mDataManager.getUser(1L);
-            LogUtils.i("token", user.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

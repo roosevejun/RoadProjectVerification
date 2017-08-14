@@ -7,6 +7,7 @@ import com.tongtu.roadproject.verifification.di.ActivityContext;
 
 import dagger.Module;
 import dagger.Provides;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by janisharali on 08/12/16.
@@ -30,5 +31,10 @@ public class ActivityModule {
     @Provides
     Activity provideActivity() {
         return mActivity;
+    }
+
+    @Provides
+    CompositeSubscription provideCompositeSubscription() {
+        return new CompositeSubscription();
     }
 }

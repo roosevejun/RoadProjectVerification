@@ -1,20 +1,28 @@
 package com.tongtu.roadproject.verifification.activity;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
-import com.tongtu.roadproject.verifification.Appstart;
+import com.tongtu.roadproject.verifification.DetectApplication;
 import com.tongtu.roadproject.verifification.R;
+import com.tongtu.roadproject.verifification.di.component.ApplicationComponent;
+import com.tongtu.roadproject.verifification.di.component.DaggerLoginComponent;
+import com.tongtu.roadproject.verifification.di.component.LoginComponent;
+import com.tongtu.roadproject.verifification.di.module.LoginModule;
+import com.tongtu.roadproject.verifification.di.presenter.LoginPresenter;
+import com.tongtu.roadproject.verifification.di.view.LoginView;
 import com.tongtu.roadproject.verifification.utils.CircularAnim;
 import com.tongtu.roadproject.verifification.utils.LogUtils;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -35,7 +43,7 @@ import rx.subscriptions.CompositeSubscription;
  * @版本：V
  */
 
-public class LoginActivity extends Activity {
+public class LoginActivity extends BaseActivity implements LoginView {
 
     RelativeLayout rl_user;
     @BindView(R.id.login)
@@ -43,15 +51,26 @@ public class LoginActivity extends Activity {
     @BindView(R.id.login_progressBar)
     ProgressBar loginProgressBar;
 
-    private CompositeSubscription mSubscriptions;
+    private LoginComponent loginComponent;
+    @Inject
+    LoginPresenter presenter;
+
+    @Inject
+    CompositeSubscription mSubscriptions;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
-        mSubscriptions = new CompositeSubscription();
-        Subscription subscription = Appstart.getBusComponent().getUserLoginSubject().subscribe((message) -> {
+    }
+
+    @Override
+    protected void setupComponent(ApplicationComponent applicationComponent) {
+
+        loginComponent = DaggerLoginComponent.builder().applicationComponent(DetectApplication.get(this).component()).loginModule(new LoginModule(this)).build();
+        loginComponent.inject(this);
+        Subscription subscription = DetectApplication.getBusComponent().getUserLoginSubject().subscribe((message) -> {
             LogUtils.i(message);
         });
 
@@ -65,7 +84,7 @@ public class LoginActivity extends Activity {
 
     @OnClick(R.id.login)
     public void userLoginOnClick(View view) {
-        Appstart.getBusComponent().getUserLoginSubject().onNext("用户点击登录按钮");
+        DetectApplication.getBusComponent().getUserLoginSubject().onNext("用户点击登录按钮");
         CircularAnim.hide(loginBtn)
                 .endRadius(loginProgressBar.getHeight() / 2)
                 .go(new CircularAnim.OnAnimationEndListener() {
@@ -100,7 +119,7 @@ public class LoginActivity extends Activity {
                     public void onClick(DialogInterface dialog, int which) {
                         try {
                             dialog.dismiss();
-                            Appstart.getBusComponent().getAppExitSubject().onNext("用户点击退出按钮");
+                            DetectApplication.getBusComponent().getAppExitSubject().onNext("用户点击退出按钮");
                             android.os.Process.killProcess(android.os.Process.myPid());
                             System.exit(1);
 //                            Intent homeIntent = new Intent(Intent.ACTION_MAIN);
@@ -128,5 +147,30 @@ public class LoginActivity extends Activity {
     public void onDestroy() {
         super.onDestroy();
         mSubscriptions.unsubscribe();
+    }
+
+    @Override
+    public void showProgress() {
+
+    }
+
+    @Override
+    public void hideProgress() {
+
+    }
+
+    @Override
+    public void setUsernameError(String error) {
+
+    }
+
+    @Override
+    public void setPasswordError(String error) {
+
+    }
+
+    @Override
+    public void navigateToHome() {
+
     }
 }
